@@ -5,6 +5,7 @@ import com.project.taskManagement.entity.TaskTable;
 import com.project.taskManagement.entity.UserTable;
 import com.project.taskManagement.repository.TasksRepo;
 import com.project.taskManagement.repository.UsersRepo;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,14 @@ public class UserService {
         return "added user";
 
     }
-    public List<TaskTable> getTasksByUserId(@PathVariable Long userId){
+    public List<TaskTable> getAllTasks(){
+        return tasksRepo.findAll();
+    }
+    public List<UserTable> getAllUsers(){
+        return usersRepo.findAll();
+    }
+
+    public List<TaskTable> getTasksByUserId(Long userId){
         return tasksRepo.findByUserId(userId);
 
     }

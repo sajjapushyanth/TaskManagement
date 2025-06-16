@@ -8,9 +8,9 @@ import com.project.taskManagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class AdminController {
@@ -30,6 +30,16 @@ public class AdminController {
         String response=userService.createUser(userTable);
         ResponseEntity<String> value =new ResponseEntity<>(response, HttpStatus.CREATED);
         return value;
+    }
+    @GetMapping("/task/get/all")
+    public List<TaskTable> getAllTasks(){
+        return userService.getAllTasks();
+
+    }
+    @GetMapping("/users/get/all")
+    public List<UserTable> getAllUsers(){
+        return userService.getAllUsers();
+
     }
 
 
