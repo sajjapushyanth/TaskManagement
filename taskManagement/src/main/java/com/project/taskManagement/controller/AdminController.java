@@ -7,6 +7,7 @@ import com.project.taskManagement.service.TaskService;
 import com.project.taskManagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,24 @@ public class AdminController {
     public List<UserTable> getAllUsers(){
         return userService.getAllUsers();
 
+    }
+
+
+    @GetMapping(value = "/healthCheck", produces = MediaType.TEXT_HTML_VALUE)
+    public String healthCheck() {
+        String appStatus = "UP";
+        String dbStatus = "DOWN";
+        try {
+            if (userService.isDbUp()) {
+                dbStatus = "UP";
+            }
+        } catch (Exception e) {
+            dbStatus = "DOWN";
+        }
+        return "<html><body>"
+                + "<h2>Application Status: " + appStatus + "</h2>"
+                + "<h2>Database Status: " + dbStatus + "</h2>"
+                + "</body></html>";
     }
 
 

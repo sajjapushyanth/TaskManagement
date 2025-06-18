@@ -12,17 +12,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/task")
 public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping("/task/get/{userId}")
+    @GetMapping("/get/{userId}")
     public List<TaskTable> getTasksByUserId(@PathVariable Long userId){
         return userService.getTasksByUserId(userId);
 
     }
 
-    @PutMapping("/task/updateStatus/{taskId}")
+    @PutMapping("/updateStatus/{taskId}")
     public ResponseEntity<Object> updateTasksStatus(@PathVariable Long taskId, @RequestBody TaskDto taskDto){
         TaskDto taskDto1=userService.updateTask(taskId,taskDto);
         return new ResponseEntity<>(taskDto1, HttpStatus.OK);

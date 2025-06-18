@@ -6,6 +6,8 @@ import com.project.taskManagement.entity.UserTable;
 import com.project.taskManagement.repository.TasksRepo;
 import com.project.taskManagement.repository.UsersRepo;
 import org.apache.catalina.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
+    private static final Logger logger = LogManager.getLogger(UserService.class);
+
     @Autowired
     UsersRepo usersRepo;
     @Autowired
@@ -45,8 +50,8 @@ public class UserService {
 
     public TaskDto updateTask(Long taskId, TaskDto taskDto){
         List<TaskTable>op=tasksRepo.findByTaskTableTaskId(taskId);
-        System.out.println("hello");
-        System.out.println(op);
+        logger.info("Finding tasks for taskId: {}", taskId);
+        logger.debug("Tasks found: {}", op);
         if (op != null && !op.isEmpty()) {
             TaskTable existingTask=op.get(0);
             existingTask.setStatus(taskDto.getStatus());
@@ -56,11 +61,21 @@ public class UserService {
             result.setStatus(savedTasks.getStatus());
             return result;
         }
-        else{
+        else {
+            logger.warn("No tasks found for taskId: {}", taskId);
             throw new RuntimeException("No tasks found for taskId: " + taskId);
         }
 
 
+    }
+
+    public boolean isDbUp() {
+        try {
+            tasksRepo.count();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
