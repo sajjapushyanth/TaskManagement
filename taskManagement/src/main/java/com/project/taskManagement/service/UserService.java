@@ -7,6 +7,7 @@ import com.project.taskManagement.repository.TasksRepo;
 import com.project.taskManagement.repository.UsersRepo;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -19,9 +20,14 @@ public class UserService {
     UsersRepo usersRepo;
     @Autowired
     TasksRepo tasksRepo;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     public String createUser(UserTable userTable){
 
+        String encodedPassword = passwordEncoder.encode(userTable.getPassword());
+        userTable.setPassword(encodedPassword);
         usersRepo.save(userTable);
+
         return "added user";
 
     }

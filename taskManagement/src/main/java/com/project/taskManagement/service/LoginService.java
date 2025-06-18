@@ -1,30 +1,37 @@
 package com.project.taskManagement.service;
 
+import com.project.taskManagement.config.JwtUtil;
 import com.project.taskManagement.dto.LoginDto;
 import com.project.taskManagement.entity.UserTable;
 import com.project.taskManagement.repository.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LoginService {
     @Autowired
     UsersRepo usersRepo;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    JwtUtil jwtUtil;
 
-    public String loginUserNamePass(Long userId,LoginDto loginDto){
-        System.out.println("beff");
-        Optional<UserTable> op=usersRepo.findById(userId);
-        System.out.println("hellll");
-        System.out.println(op);
-        if(op!=null &&!op.isEmpty()){
-            UserTable existingCredentials=op.get();
-            System.out.println("before if");
-            if(loginDto.getUserName().equals(existingCredentials.getUserName()) &&
-                loginDto.getPassword().equals(existingCredentials.getPassword())){
-                System.out.println("in if");
-                return "Valid Login";
+    public String loginUserNamePass(LoginDto loginDto){
+
+        List<UserTable> users=usersRepo.findByUserName(loginDto.getUserName());
+        System.out.println("in service");
+        System.out.println("userName: " + loginDto.getUserName());
+
+        if(users.size()>=1){
+            UserTable existingCredentials=users.get(0);
+
+            if( passwordEncoder.matches(loginDto.getPassword(),existingCredentials.getPassword())){
+
+                return jwtUtil.generateToken(loginDto.getUserName());
             }
             else{
                 return "Invalid Login";
@@ -32,7 +39,8 @@ public class LoginService {
 
             }
         else {
-            throw new RuntimeException("No user found with id " + userId);
+            throw new RuntimeException("No user found with userName " + loginDto.getUserName());
         }
 
 }}
+
