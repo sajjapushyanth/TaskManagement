@@ -1,8 +1,10 @@
 package com.project.taskManagement.service;
 
 import com.project.taskManagement.dto.TaskDto;
+import com.project.taskManagement.dto.UserDto;
 import com.project.taskManagement.entity.TaskTable;
 import com.project.taskManagement.entity.UserTable;
+import com.project.taskManagement.exception.UserAlreadyPresentException;
 import com.project.taskManagement.repository.TasksRepo;
 import com.project.taskManagement.repository.UsersRepo;
 import org.apache.catalina.User;
@@ -27,9 +29,18 @@ public class UserService {
     TasksRepo tasksRepo;
     @Autowired
     PasswordEncoder passwordEncoder;
-    public String createUser(UserTable userTable){
+    public String createUser(UserDto userDto){
 
-        String encodedPassword = passwordEncoder.encode(userTable.getPassword());
+        UserTable userTable=new UserTable();
+
+        List<UserTable> users= usersRepo.findByUserName(userTable.getUserName());
+        if(!users.isEmpty()){
+            throw new UserAlreadyPresentException(userTable.getUserName());
+        }
+        userTable.setUserName(userDto.getUserName());
+        userTable.setRole(userDto.getRole());
+        userTable.setEmail(userDto.getEmail());
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
         userTable.setPassword(encodedPassword);
         usersRepo.save(userTable);
 
