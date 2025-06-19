@@ -1,5 +1,6 @@
 package com.project.taskManagement.controller;
 
+import com.project.taskManagement.dto.TaskDto;
 import com.project.taskManagement.dto.UserDto;
 import com.project.taskManagement.entity.TaskTable;
 import com.project.taskManagement.entity.UserTable;
@@ -40,10 +41,15 @@ public class AdminController {
                 + "</html>";
     }
     @PostMapping("/task/create")
-    public ResponseEntity<String> createTask(@RequestBody TaskTable taskTable){
-        String response=taskService.addTasks(taskTable);
-        ResponseEntity<String> value =new ResponseEntity<>(response, HttpStatus.CREATED);
-        return value;
+    public ResponseEntity<String> createTask( @Valid @RequestBody TaskDto taskDto){
+        try {
+            String response = taskService.addTasks(taskDto);
+            ResponseEntity<String> value = new ResponseEntity<>(response, HttpStatus.CREATED);
+            return value;
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
     @PostMapping("/user/create")
     public ResponseEntity<String> createUser( @Valid @RequestBody UserDto userDto){
@@ -65,7 +71,6 @@ public class AdminController {
         return userService.getAllUsers();
 
     }
-
 
     @GetMapping(value = "/healthCheck", produces = MediaType.TEXT_HTML_VALUE)
     public String healthCheck() {
