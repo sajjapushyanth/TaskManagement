@@ -22,6 +22,8 @@ public class UserTable {
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
     private String email;
+    @Column(nullable = false,columnDefinition = "boolean default false")
+    private boolean isEmailVerified = false;
 
 
 }

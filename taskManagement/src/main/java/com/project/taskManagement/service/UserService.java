@@ -4,9 +4,13 @@ import com.project.taskManagement.dto.TaskDto;
 import com.project.taskManagement.dto.UserDto;
 import com.project.taskManagement.entity.TaskTable;
 import com.project.taskManagement.entity.UserTable;
+import com.project.taskManagement.entity.VerifyToken;
 import com.project.taskManagement.exception.UserAlreadyPresentException;
+import com.project.taskManagement.helper.GenerateRandomNumber;
 import com.project.taskManagement.repository.TasksRepo;
+import com.project.taskManagement.repository.TokenRepo;
 import com.project.taskManagement.repository.UsersRepo;
+import com.project.taskManagement.helper.GenerateRandomNumber;
 import org.apache.catalina.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +19,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -29,7 +35,15 @@ public class UserService {
     TasksRepo tasksRepo;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    TokenRepo tokenRepo;
+    @Autowired
+    EmailService emailService;
+
     public String createUser(UserDto userDto){
+        String token= UUID.randomUUID().toString();
+        Integer randomOtp= GenerateRandomNumber.generateOtp(100000,999999);
+        VerifyToken verifyToken=new VerifyToken();
 
         UserTable userTable=new UserTable();
 
@@ -37,12 +51,25 @@ public class UserService {
         if(!users.isEmpty()){
             throw new UserAlreadyPresentException(userTable.getUserName());
         }
+        if(usersRepo.existsByEmail(userDto.getEmail())) {
+            throw new UserAlreadyPresentException("Email already exists: " + userDto.getEmail(),true);
+        }
         userTable.setUserName(userDto.getUserName());
         userTable.setRole(userDto.getRole());
         userTable.setEmail(userDto.getEmail());
         String encodedPassword = passwordEncoder.encode(userDto.getPassword());
         userTable.setPassword(encodedPassword);
         usersRepo.save(userTable);
+        verifyToken.setToken(token);
+        verifyToken.setUser(userTable);
+        verifyToken.setExpiryDate(LocalDateTime.now().plusHours(1));
+        verifyToken.setOtp(randomOtp);
+
+        tokenRepo.save(verifyToken);
+
+        String verifyUrl= "http://localhost:8080/api/auth/verify/"+randomOtp;
+        emailService.sendVerificationEmail(userTable.getEmail(), "Verify your account Click to verify",verifyUrl);
+
 
         return "added user";
 

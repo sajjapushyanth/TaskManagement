@@ -1,6 +1,7 @@
 package com.project.taskManagement.dto;
 
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,5 +23,7 @@ public class UserDto {
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
     private String email;
+    @Column(nullable = false,columnDefinition = "boolean default false")
+    private boolean isEmailVerified = false;
 
 }
