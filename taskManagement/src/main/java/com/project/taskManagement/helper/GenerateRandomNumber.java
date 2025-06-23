@@ -7,8 +7,8 @@ public class GenerateRandomNumber {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
 
     }
-    public static void main(String[] args){
-        int randomOtp= generateOtp(100000, 999999);
-        System.out.println("Random OTP: " + randomOtp);
-    }
+//    public static void main(String[] args){
+//        int randomOtp= generateOtp(100000, 999999);
+//        System.out.println("Random OTP: " + randomOtp);
+//    }
 }

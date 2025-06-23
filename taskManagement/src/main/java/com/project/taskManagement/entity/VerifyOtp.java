@@ -3,11 +3,12 @@ package com.project.taskManagement.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class VerifyToken {
+public class VerifyOtp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,6 +19,6 @@ public class VerifyToken {
     @JoinColumn(nullable = false)
     private UserTable user;
 
-    private LocalDateTime expiryDate;
+    private Timestamp timestamp;
 
 }

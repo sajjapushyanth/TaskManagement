@@ -1,8 +1,8 @@
 package com.project.taskManagement.controller;
 
 import com.project.taskManagement.entity.UserTable;
-import com.project.taskManagement.entity.VerifyToken;
-import com.project.taskManagement.repository.TokenRepo;
+import com.project.taskManagement.entity.VerifyOtp;
+import com.project.taskManagement.repository.OtpRepo;
 import com.project.taskManagement.repository.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,18 +18,19 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
-    TokenRepo tokenRepo;
+    OtpRepo tokenRepo;
     @Autowired
     UsersRepo usersRepo;
     @GetMapping("/verify")
     public ResponseEntity<String> verifyUser(@RequestParam int otp){
-//        Optional<VerifyToken> optionalToken= tokenRepo.findByToken(token);
-        Optional<VerifyToken>Verifyotp=tokenRepo.findByOtp(otp);
+        Optional<VerifyOtp>Verifyotp=tokenRepo.findByOtp(otp);
         if(!Verifyotp.isPresent()){
             return ResponseEntity.badRequest().body("Invalid OTP");
         }
-        VerifyToken verifyToken=Verifyotp.get();
-        if(verifyToken.getExpiryDate().isBefore(LocalDateTime.now())){
+        VerifyOtp verifyToken=Verifyotp.get();
+        LocalDateTime generateTime=verifyToken.getTimestamp().toLocalDateTime();
+        if(generateTime.plusMinutes(5).isBefore(LocalDateTime.now())){
+            tokenRepo.delete(verifyToken);
             return ResponseEntity.badRequest().body("OTP expired");
         }
         UserTable user =verifyToken.getUser();

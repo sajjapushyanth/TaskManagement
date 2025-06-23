@@ -4,24 +4,21 @@ import com.project.taskManagement.dto.TaskDto;
 import com.project.taskManagement.dto.UserDto;
 import com.project.taskManagement.entity.TaskTable;
 import com.project.taskManagement.entity.UserTable;
-import com.project.taskManagement.entity.VerifyToken;
+import com.project.taskManagement.entity.VerifyOtp;
 import com.project.taskManagement.exception.UserAlreadyPresentException;
 import com.project.taskManagement.helper.GenerateRandomNumber;
 import com.project.taskManagement.repository.TasksRepo;
-import com.project.taskManagement.repository.TokenRepo;
+import com.project.taskManagement.repository.OtpRepo;
 import com.project.taskManagement.repository.UsersRepo;
-import com.project.taskManagement.helper.GenerateRandomNumber;
-import org.apache.catalina.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,14 +33,14 @@ public class UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
-    TokenRepo tokenRepo;
+    OtpRepo tokenRepo;
     @Autowired
     EmailService emailService;
 
     public String createUser(UserDto userDto){
         String token= UUID.randomUUID().toString();
         Integer randomOtp= GenerateRandomNumber.generateOtp(100000,999999);
-        VerifyToken verifyToken=new VerifyToken();
+        VerifyOtp verifyToken=new VerifyOtp();
 
         UserTable userTable=new UserTable();
 
@@ -62,14 +59,12 @@ public class UserService {
         usersRepo.save(userTable);
         verifyToken.setToken(token);
         verifyToken.setUser(userTable);
-        verifyToken.setExpiryDate(LocalDateTime.now().plusHours(1));
+        verifyToken.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         verifyToken.setOtp(randomOtp);
 
         tokenRepo.save(verifyToken);
 
-        String verifyUrl= "http://localhost:8080/api/auth/verify/"+randomOtp;
-        emailService.sendVerificationEmail(userTable.getEmail(), "Verify your account Click to verify",verifyUrl);
-
+        emailService.sendVerificationEmail(userTable.getEmail(), "Verify your account OTP",html(randomOtp));
 
         return "added user";
 
@@ -84,6 +79,24 @@ public class UserService {
     public List<TaskTable> getTasksByUserId(Long userId){
         return tasksRepo.findByUserId(userId);
 
+    }
+    public String html(Integer otp) {
+        return "<!DOCTYPE html>"
+                + "<html>"
+                + "<head>"
+                + "<meta charset='UTF-8'>"
+                + "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                + "<title>TaskManagement OTP</title>"
+                + "</head>"
+                + "<body style='font-family: Arial, sans-serif; text-align: center; background-color: #f9f9f9; padding: 20px;'>"
+                + "<h1 style='color: #3498db;'>Welcome to TaskManagement Home Page</h1>"
+                + "<p style='font-size: 18px;'>Your OTP is: <strong style='color: #e74c3c;'>" + otp + "</strong></p>"
+                + "<p style='font-size: 18px;'>Thank you for visiting our page.</p>"
+                + "<hr style='border: 0; border-top: 1px solid #ddd;'>"
+                + "<p style='font-size: 14px; color: #888;'>If you did not request this, please ignore this email.</p>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
     }
 
     public TaskDto updateTask(Long taskId, TaskDto taskDto){
