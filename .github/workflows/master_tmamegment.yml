@@ -28,11 +28,11 @@ jobs:
         run: mvn clean install
         working-directory: ./taskManagement
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
+      -  name: Upload artifact for deployment job
+         uses: actions/upload-artifact@v4
+         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: taskManagement/target/*.jar
 
   deploy:
     runs-on: windows-latest
